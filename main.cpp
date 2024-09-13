@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <algorithm> // for transform
 
 using namespace std;
 
@@ -21,6 +22,13 @@ public:
         price = pprice;
     }
 };
+
+// Utility function to convert a string to lowercase
+string toLowercase(const string& str) {
+    string lowerStr = str;
+    transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), ::tolower);
+    return lowerStr;
+}
 
 // ShoppingCart class to manage items in the cart
 class ShoppingCart {
@@ -150,8 +158,10 @@ int main() {
     int quantity;
 
     while (true) {
-        cout << "\nMenu:\n1. View Products\n2. View Shopping Cart\n3. View Orders\n4. Exit" << endl;
-        cout << "Enter your choice: ";
+        cout << "\n------- Menu ------\n1. View Products\n2. View Shopping Cart\n3. View Orders\n4. Exit" << endl;
+        cout << "-------------------\n";
+        cout << "Enter your choice: \n";
+        cout << "-------------------\n";
         cin >> choice;
 
         switch (choice) {
@@ -160,13 +170,18 @@ int main() {
                 do {
                     cout << "Enter the ID of the product you want to add to the shopping cart: ";
                     cin >> productId;
+
+                    // Convert user input to lowercase for case-insensitive comparison
+                    string lowerProductId = toLowercase(productId);
+
                     cout << "Enter the quantity: ";
                     cin >> quantity;
 
                     // Find the product by ID and add it to the shopping cart
                     bool found = false;
                     for (int i = 0; i < numProducts; ++i) {
-                        if (productList[i].id == productId) {
+                        // Convert stored product IDs to lowercase for comparison
+                        if (toLowercase(productList[i].id) == lowerProductId) {
                             shoppingCart.addProductToCart(productList[i], quantity);
                             found = true;
                             break;
