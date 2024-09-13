@@ -1,242 +1,218 @@
 #include <iostream>
-#include <string>
-#include <iomanip>  // Added for tabular formatting
-#include <algorithm> // For transform
-#include <cctype>    // For tolower
+#include <iomanip>
 
 using namespace std;
 
+// Maximum number of products allowed in the shopping cart and orders
 const int MAX_PRODUCTS = 100;
-const int MAX_CART_ITEMS = 100;
-const int MAX_ORDERS = 100;
 
+// Product class to represent individual products
 class Product {
-private:
-    string productId;
-    string name;
-    string description;
-    float price;
-    int stock;
-
 public:
-    Product() : productId(""), name(""), description(""), price(0.0), stock(0) {}
+    string id;
+    string name;
+    double price;
 
-    Product(const string& productId, const string& name, const string& description, float price, int stock)
-            : productId(productId), name(name), description(description), price(price), stock(stock) {}
+    Product() : id(""), name(""), price(0.0) {}
 
-    string getProductId() const { return productId; }
-    string getName() const { return name; }
-    string getDescription() const { return description; }
-    float getPrice() const { return price; }
-    int getStock() const { return stock; }
-
-    void updateStock(int quantity) {
-        if (stock >= quantity) {
-            stock -= quantity;
-        } else {
-            cout << "Not enough stock available." << endl;
-        }
-    }
-
-    string getDetail() const {
-        return "ID: " + productId + ", Name: " + name + ", Price: $" + to_string(price) + ", Stock: " + to_string(stock);
+    Product(string pid, string pname, double pprice) {
+        id = pid;
+        name = pname;
+        price = pprice;
     }
 };
 
+// ShoppingCart class to manage items in the cart
 class ShoppingCart {
-private:
-    string cartId;
-    Product cartItems[MAX_CART_ITEMS];
-    int quantities[MAX_CART_ITEMS];
+public:
+    Product cartItems[MAX_PRODUCTS];
+    int quantities[MAX_PRODUCTS];
     int itemCount;
 
-public:
-    ShoppingCart() : cartId(""), itemCount(0) {}
+    ShoppingCart() : itemCount(0) {}
 
-    ShoppingCart(const string& cartId) : cartId(cartId), itemCount(0) {}
-
-    void addToCart(Product& product, int quantity) {
-        if (itemCount < MAX_CART_ITEMS) {
+    // Add product to the shopping cart
+    void addProductToCart(const Product& product, int quantity) {
+        if (itemCount < MAX_PRODUCTS) {
             cartItems[itemCount] = product;
             quantities[itemCount] = quantity;
             itemCount++;
-            cout << "Added " << quantity << " of " << product.getName() << " to the cart." << endl;
-            product.updateStock(quantity);
+            cout << "Product added successfully!" << endl;
         } else {
-            cout << "Cart is full. Cannot add more items." << endl;
+            cout << "Cart is full! Cannot add more products." << endl;
         }
     }
 
+    // View shopping cart
     void viewCart() const {
         if (itemCount == 0) {
             cout << "Your shopping cart is empty!" << endl;
             return;
         }
-
-        cout << "Shopping Cart Contents:" << endl;
+        cout << "Your Shopping Cart:" << endl;
+        cout << setw(10) << "Product ID" << setw(20) << "Name" << setw(10) << "Price" << setw(10) << "Quantity" << endl;
         for (int i = 0; i < itemCount; ++i) {
-            cout << cartItems[i].getDetail() << ", Quantity: " << quantities[i] << endl;
-        }
-    }
-
-    void clearCart() {
-        itemCount = 0;
-        cout << "Shopping cart cleared." << endl;
-    }
-
-    Product* getCartItems() { return cartItems; }
-    int* getQuantities() { return quantities; }
-    int getItemCount() const { return itemCount; }
-};
-
-class Order {
-private:
-    string orderId;
-    string orderDate;
-    string orderStatus;
-    float totalAmount;
-    Product orderedProducts[MAX_CART_ITEMS];
-    int quantities[MAX_CART_ITEMS];
-    int orderItemCount;
-
-public:
-    Order() : orderId(""), orderDate(""), orderStatus(""), totalAmount(0.0), orderItemCount(0) {}
-
-    Order(const string& orderId, const string& orderDate, const string& orderStatus, float totalAmount)
-            : orderId(orderId), orderDate(orderDate), orderStatus(orderStatus), totalAmount(totalAmount), orderItemCount(0) {}
-
-    void placeOrder(ShoppingCart& cart) {
-        orderItemCount = cart.getItemCount();
-        for (int i = 0; i < orderItemCount; ++i) {
-            orderedProducts[i] = cart.getCartItems()[i];
-            quantities[i] = cart.getQuantities()[i];
-            totalAmount += orderedProducts[i].getPrice() * quantities[i];
-        }
-        orderStatus = "Placed";
-        cout << "Order placed successfully! Order ID: " << orderId << ", Total Amount: $" << totalAmount << endl;
-    }
-
-    void viewOrderDetails() const {
-        cout << "\nOrder ID: " << orderId << ", Date: " << orderDate << ", Status: " << orderStatus << ", Total Amount: $" << totalAmount << endl;
-
-        // Print table header
-        cout << left << setw(10) << "Product ID" << setw(20) << "Name" << setw(10) << "Price" << setw(10) << "Quantity" << endl;
-        cout << "----------------------------------------------------------" << endl;
-
-        for (int i = 0; i < orderItemCount; ++i) {
-            cout << left << setw(10) << orderedProducts[i].getProductId()
-                 << setw(20) << orderedProducts[i].getName()
-                 << setw(10) << orderedProducts[i].getPrice()
+            cout << setw(10) << cartItems[i].id
+                 << setw(20) << cartItems[i].name
+                 << setw(10) << cartItems[i].price
                  << setw(10) << quantities[i] << endl;
         }
     }
+
+    // Checkout process
+    double checkout() const {
+        if (itemCount == 0) {
+            cout << "Your shopping cart is empty!" << endl;
+            return 0;
+        }
+
+        double total = 0;
+        cout << "Products for Checkout:" << endl;
+        cout << setw(10) << "Product ID" << setw(20) << "Name" << setw(10) << "Price" << setw(10) << "Quantity" << endl;
+        for (int i = 0; i < itemCount; ++i) {
+            cout << setw(10) << cartItems[i].id
+                 << setw(20) << cartItems[i].name
+                 << setw(10) << cartItems[i].price
+                 << setw(10) << quantities[i] << endl;
+            total += cartItems[i].price * quantities[i];
+        }
+        cout << "Total Amount: $" << total << endl;
+        return total;
+    }
+
+    // Clear the cart after checkout
+    void clearCart() {
+        itemCount = 0;
+    }
 };
 
-class Customer {
-private:
-    string customerId;
-    string customerName;
-    string email;
-    string address;
-    ShoppingCart cart;
-    Order orderHistory[MAX_ORDERS];
-    int orderCount;
-
+// Order class to store past orders
+class Order {
 public:
-    Customer(const string& customerId, const string& name, const string& email, const string& address)
-            : customerId(customerId), customerName(name), email(email), address(address), cart("CART_" + customerId), orderCount(0) {}
+    string orderId;
+    Product orderItems[MAX_PRODUCTS];
+    int quantities[MAX_PRODUCTS];
+    int itemCount;
+    double totalAmount;
 
-    void addToCart(Product& product, int quantity) {
-        cart.addToCart(product, quantity);
+    Order() : itemCount(0), totalAmount(0) {}
+
+    void setOrder(const string &oid, const Product products[], const int qtys[], int count, double total) {
+        orderId = oid;
+        for (int i = 0; i < count; ++i) {
+            orderItems[i] = products[i];
+            quantities[i] = qtys[i];
+        }
+        itemCount = count;
+        totalAmount = total;
     }
 
-    void viewCart() const {
-        cart.viewCart();
-    }
-
-    void placeOrder() {
-        if (cart.getItemCount() == 0) {
-            cout << "Cart is empty, cannot place an order." << endl;
-            return;
+    void viewOrderDetails() const {
+        cout << "Order ID: " << orderId << endl;
+        cout << setw(10) << "Product ID" << setw(20) << "Name" << setw(10) << "Price" << setw(10) << "Quantity" << endl;
+        for (int i = 0; i < itemCount; ++i) {
+            cout << setw(10) << orderItems[i].id
+                 << setw(20) << orderItems[i].name
+                 << setw(10) << orderItems[i].price
+                 << setw(10) << quantities[i] << endl;
         }
-
-        string orderId = "ORD_" + to_string(orderCount + 1);
-        Order newOrder(orderId, "2024-09-13", "Placed", 0.0);
-        newOrder.placeOrder(cart);
-        orderHistory[orderCount++] = newOrder;
-        cart.clearCart();
-    }
-
-    void viewOrderHistory() const {
-        if (orderCount == 0) {
-            cout << "No orders have been placed yet." << endl;
-            return;
-        }
-
-        for (int i = 0; i < orderCount; ++i) {
-            orderHistory[i].viewOrderDetails();
-        }
+        cout << "Total Amount: $" << totalAmount << endl;
     }
 };
 
-// Function to convert a string to lowercase
-string toLower(const string& str) {
-    string result = str;
-    transform(result.begin(), result.end(), result.begin(), ::tolower);
-    return result;
-}
+// Predefined list of products
+Product productList[] = {
+        Product("J001", "Air Jordan 1", 150.0),
+        Product("N001", "Nike Air Max", 120.0),
+        Product("J002", "Air Jordan 4", 200.0),
+        Product("N002", "Nike Dunk Low", 130.0)
+};
+int numProducts = 4;
 
-void displayMenu() {
-    cout << "\n--- SAVEWAY ---\n";
-    cout << "1. View Products\n";
-    cout << "2. View Shopping Cart\n";
-    cout << "3. View Orders\n";
-    cout << "4. Exit\n";
-    cout << "Enter your choice: ";
+// Function to display available products
+void displayProducts() {
+    cout << "Available Products:" << endl;
+    cout << setw(10) << "Product ID" << setw(20) << "Name" << setw(10) << "Price" << endl;
+    for (int i = 0; i < numProducts; ++i) {
+        cout << setw(10) << productList[i].id
+             << setw(20) << productList[i].name
+             << setw(10) << productList[i].price << endl;
+    }
 }
 
 int main() {
-    // Create sample products
-    Product products[MAX_PRODUCTS] = {
-            Product("P001", "Laptop", "High-performance laptop", 1200.0, 10),
-            Product("P002", "Smartphone", "Latest smartphone model", 800.0, 20),
-            Product("P003", "Headphones", "Noise-cancelling headphones", 150.0, 30),
-            Product("P004", "Tablet", "10-inch tablet", 400.0, 15),
-            Product("P005", "Smartwatch", "Fitness smartwatch", 250.0, 25),
-            Product("P006", "Wireless Earbuds", "Bluetooth earbuds", 100.0, 40),
-            Product("P007", "Monitor", "27-inch 4K monitor", 300.0, 5),
-            Product("P008", "Keyboard", "Mechanical gaming keyboard", 80.0, 10),
-            Product("P009", "Mouse", "Wireless mouse", 40.0, 20),
-            Product("P010", "External Hard Drive", "1TB USB 3.0 hard drive", 60.0, 10)
-    };
-    int productCount = 10; // Adjust to the actual number of products
+    ShoppingCart shoppingCart;
+    Order orderHistory[MAX_PRODUCTS];
+    int orderCount = 0;
+    int choice;
+    string productId;
+    char addMore, checkoutChoice;
+    int quantity;
 
-    // Create a customer
-    Customer customer("C001", "John Doe", "john@example.com", "123 Street, City");
+    while (true) {
+        cout << "\nMenu:\n1. View Products\n2. View Shopping Cart\n3. View Orders\n4. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
 
-    bool user = true;
+        switch (choice) {
+            case 1: {
+                displayProducts();
+                do {
+                    cout << "Enter the ID of the product you want to add to the shopping cart: ";
+                    cin >> productId;
+                    cout << "Enter the quantity: ";
+                    cin >> quantity;
 
-    // Main menu loop
-    while (user) {
-        displayMenu();
-        string input;
-        getline(cin, input); // Use getline to handle potential multi-word input
-        input = toLower(input); // Convert input to lowercase
+                    // Find the product by ID and add it to the shopping cart
+                    bool found = false;
+                    for (int i = 0; i < numProducts; ++i) {
+                        if (productList[i].id == productId) {
+                            shoppingCart.addProductToCart(productList[i], quantity);
+                            found = true;
+                            break;
+                        }
+                    }
 
-        if (input == "1" || input == "view products") {
-            cout << "\nAvailable Products:\n";
-            for (int i = 0; i < productCount; ++i) {
-                cout << products[i].getDetail() << endl;
+                    if (!found) {
+                        cout << "Product not found!" << endl;
+                    }
+
+                    cout << "Do you want to add another product? (Y/N): ";
+                    cin >> addMore;
+                } while (addMore == 'Y' || addMore == 'y');
+                break;
             }
-        } else if (input == "2" || input == "view shopping cart") {
-            customer.viewCart();
-        } else if (input == "3" || input == "view orders") {
-            customer.viewOrderHistory();
-        } else if (input == "4" || input == "exit") {
-            cout << "Exiting program. Goodbye!" << endl;
-            user = false;
-        } else {
-            cout << "Invalid choice. Please try again." << endl;
+            case 2: {
+                shoppingCart.viewCart();
+                cout << "Do you want to check out all the products? (Y/N): ";
+                cin >> checkoutChoice;
+                if (checkoutChoice == 'Y' || checkoutChoice == 'y') {
+                    double total = shoppingCart.checkout();
+                    string orderId = "ORD" + to_string(orderCount + 1);
+                    orderHistory[orderCount].setOrder(orderId, shoppingCart.cartItems, shoppingCart.quantities, shoppingCart.itemCount, total);
+                    orderCount++;
+                    shoppingCart.clearCart();
+                    cout << "You have successfully checked out the products!" << endl;
+                }
+                break;
+            }
+            case 3: {
+                if (orderCount == 0) {
+                    cout << "No orders found." << endl;
+                } else {
+                    for (int i = 0; i < orderCount; ++i) {
+                        orderHistory[i].viewOrderDetails();
+                        cout << "---------------------------------------" << endl;
+                    }
+                }
+                break;
+            }
+            case 4: {
+                cout << "Exiting the program..." << endl;
+                return 0;
+            }
+            default:
+                cout << "Invalid choice. Please try again." << endl;
         }
     }
 
