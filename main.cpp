@@ -227,7 +227,9 @@ int main() {
                 return 0;
             }
             default:
+                cin.clear();
                 cout << "Invalid choice. Please try again." << endl;
+                cin.ignore();
         }
     }
 
